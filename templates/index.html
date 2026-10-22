@@ -1,0 +1,415 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PricePulse — Smart Price Tracking</title>
+    <meta name="description" content="Track product prices and find better deals with PricePulse.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-shell">
+
+        <aside class="sidebar">
+            <a href="#dashboard" class="brand">
+                <span class="brand-icon">↗</span>
+                <span>Price<span class="accent">Pulse</span></span>
+            </a>
+
+            <div class="sidebar-label">WORKSPACE</div>
+
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-link active">
+                    <span class="nav-icon">▦</span> Dashboard
+                </a>
+                <a href="#track" class="nav-link">
+                    <span class="nav-icon">＋</span> Track a product
+                </a>
+                <a href="#watchlist" class="nav-link">
+                    <span class="nav-icon">♡</span> My watchlist
+                    <span class="nav-count">0</span>
+                </a>
+                <a href="#history" class="nav-link">
+                    <span class="nav-icon">◷</span> Price history
+                </a>
+            </nav>
+
+            <div class="sidebar-label">PREFERENCES</div>
+
+            <nav class="sidebar-nav">
+                <a href="#settings" class="nav-link">
+                    <span class="nav-icon">⚙</span> Settings
+                </a>
+            </nav>
+
+            <div class="sidebar-spacer"></div>
+
+            <div class="sidebar-promo">
+                <div class="promo-symbol">✦</div>
+                <h3>Every rupee counts.</h3>
+                <p>Set your target. Watch the price. Buy smarter.</p>
+                <a href="#track">Track a product →</a>
+            </div>
+
+            <div class="sidebar-footer">
+                <span class="profile-avatar">P</span>
+                <div>
+                    <strong>PricePulse User</strong>
+                    <span>Personal workspace</span>
+                </div>
+                <span class="profile-menu">···</span>
+            </div>
+        </aside>
+
+        <main class="main-content" id="dashboard">
+
+            <header class="topbar">
+                <div class="breadcrumb">Workspace <span>/</span> Dashboard</div>
+                <div class="topbar-right">
+                    <span class="system-status">
+                        <span class="status-dot"></span> PRICE CHECKER READY
+                    </span>
+                    <span class="topbar-avatar">P</span>
+                </div>
+            </header>
+
+            <section class="page-heading">
+                <div>
+                    <div class="eyebrow">YOUR SMART SHOPPING SPACE</div>
+                    <h1>Good deals start <span class="gradient-text">here.</span></h1>
+                    <p>Keep an eye on prices and make every purchase count.</p>
+                </div>
+                <a href="#track" class="primary-button heading-button">
+                    <span>＋</span> Track a product
+                </a>
+            </section>
+
+            
+<section class="stats-grid">
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">TRACKED PRODUCTS</span>
+            <span class="stat-icon green-icon">◇</span>
+        </div>
+        <div class="stat-value">{{ total_products }}</div>
+        <div class="stat-foot">Saved products in your watchlist</div>
+    </article>
+
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">PRICE CHECKS</span>
+            <span class="stat-icon purple-icon">↗</span>
+        </div>
+        <div class="stat-value">{{ price_checks }}</div>
+        <div class="stat-foot">Recorded checks across all products</div>
+    </article>
+
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">TARGETS REACHED</span>
+            <span class="stat-icon orange-icon">◎</span>
+        </div>
+        <div class="stat-value">{{ deals }}</div>
+        <div class="stat-foot">Products currently at or below target</div>
+    </article>
+
+    <article class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">POTENTIAL SAVINGS</span>
+            <span class="stat-icon blue-icon">₹</span>
+        </div>
+        <div class="stat-value">
+            ₹{{ "%.2f"|format(potential_savings) }}
+        </div>
+        <div class="stat-foot">Estimated difference from your targets</div>
+    </article>
+</section>
+
+                    
+
+            <section class="content-grid">
+                <article class="panel tracker-panel" id="track">
+                    <div class="panel-heading">
+                        <div>
+                            <div class="section-label">PRICE MONITOR</div>
+                            <h2>Check a product price</h2>
+                            <p>Enter a public product URL and your target price.</p>
+                        </div>
+                        <span class="panel-symbol">⌁</span>
+                    </div>
+
+                    <form method="POST" action="/" class="tracker-form">
+                        <label for="url">PRODUCT PAGE URL</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">↗</span>
+                            <input
+                                type="url"
+                                id="url"
+                                name="url"
+                                placeholder="https://store.com/product"
+                                value="{{ request.form.get('url', '') }}"
+                                required
+                            >
+                        </div>
+                        <p class="input-hint">Paste the complete link to the product page.</p>
+
+                        <label for="target_price">YOUR TARGET PRICE</label>
+                        <div class="input-wrap">
+                            <span class="currency-symbol">₹</span>
+                            <input
+                                type="number"
+                                id="target_price"
+                                name="target_price"
+                                min="0.01"
+                                step="0.01"
+                                placeholder="What would you like to pay?"
+                                value="{{ request.form.get('target_price', '') }}"
+                                required
+                            >
+                        </div>
+                        <p class="input-hint">We'll compare the detected price with your target.</p>
+
+                        <button type="submit" class="primary-button submit-button">
+                            Check live price <span>→</span>
+                        </button>
+                    </form>
+
+                    <div class="form-note">
+                        <span>ⓘ</span>
+                        Checks happen when you submit this form.
+                    </div>
+                </article>
+
+                <article class="panel insight-panel">
+                    <div class="section-label">YOUR PRICE STRATEGY</div>
+                    <h2>Shop with a plan.</h2>
+                    <p class="insight-description">
+                        A target price helps you decide when a deal fits your budget.
+                    </p>
+
+                    <div class="strategy-visual">
+                        <div class="strategy-ring">
+                            <span>₹</span>
+                        </div>
+                        <div class="strategy-copy">
+                            <strong>Your budget, your call.</strong>
+                            <span>Set your ideal price before you buy.</span>
+                        </div>
+                    </div>
+
+                    <div class="insight-divider"></div>
+
+                    <div class="mini-tip">
+                        <span class="tip-icon">✦</span>
+                        <div>
+                            <strong>PricePulse tip</strong>
+                            <p>Compare the final checkout price too. Delivery charges and discounts can change the total.</p>
+                        </div>
+                    </div>
+
+                    <a href="#history" class="text-link">Explore price history <span>→</span></a>
+                </article>
+            </section>
+
+            {% if result %}
+            <section class="panel result-card {% if result.is_deal %}deal-result{% else %}wait-result{% endif %}" id="result">
+                <div class="result-heading">
+                    <div>
+                        <div class="section-label">PRICE CHECK RESULT</div>
+                        <h2>{% if result.is_deal %}Your target has been reached!{% else %}This product is above your target{% endif %}</h2>
+                    </div>
+                    <span class="result-badge">
+                        {% if result.is_deal %}✓ TARGET MET{% else %}↗ ABOVE TARGET{% endif %}
+                    </span>
+                </div>
+
+                <div class="result-grid">
+                    <div class="result-metric">
+                        <span>DETECTED PRICE</span>
+                        <strong>₹{{ "%.2f"|format(result.live_price) }}</strong>
+                    </div>
+                    <div class="result-metric">
+                        <span>YOUR TARGET</span>
+                        <strong>₹{{ "%.2f"|format(result.target_price) }}</strong>
+                    </div>
+                    <div class="result-metric">
+                        <span>{% if result.is_deal %}AT OR BELOW TARGET BY{% else %}ABOVE TARGET BY{% endif %}</span>
+                        <strong>₹{{ "%.2f"|format(result.difference|abs) }}</strong>
+                    </div>
+                </div>
+
+                <p class="result-message">
+                    {% if result.is_deal %}
+                    The detected price meets your target. Check the final price and product details before purchasing.
+                    {% else %}
+                    This product is still above your target. Check again later to see whether the price changes.
+                    {% endif %}
+                </p>
+
+                <a class="text-link" href="{{ result.url }}" target="_blank" rel="noopener noreferrer">
+                    Open retailer's product page ↗
+                </a>
+            </section>
+            {% endif %}
+
+            {% if error %}
+            <section class="error-card" role="alert">
+                <span class="error-icon">!</span>
+                <div>
+                    <h3>We couldn't check this price</h3>
+                    <p>{{ error }}</p>
+                    <p class="error-help">
+                        Some stores block automated requests or use page layouts that require a custom price selector.
+                        Try another public product page.
+                    </p>
+                </div>
+            </section>
+            {% endif %}
+
+            
+<section class="panel lower-panel" id="watchlist">
+    <div class="lower-heading">
+        <div>
+            <div class="section-label">YOUR COLLECTION</div>
+            <h2>My watchlist</h2>
+            <p>Your saved products and their latest recorded prices.</p>
+        </div>
+        <a href="#track" class="secondary-button">＋ Add product</a>
+    </div>
+
+    {% if watchlist %}
+    <div class="product-list">
+        {% for product in watchlist %}
+        <article class="product-row">
+            <div class="product-info">
+                <strong>{{ product.name }}</strong>
+                <a href="{{ product.url }}" target="_blank"
+                   rel="noopener noreferrer">Open product ↗</a>
+                <span>Last checked: {{ product.checked_at }}</span>
+            </div>
+
+            <div class="product-price">
+                <strong>₹{{ "%.2f"|format(product.current_price) }}</strong>
+                <span>Target: ₹{{ "%.2f"|format(product.target_price) }}</span>
+
+                {% if product.current_price <= product.target_price %}
+                <span class="deal-label">TARGET REACHED</span>
+                {% else %}
+                <span class="waiting-label">ABOVE TARGET</span>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">♡</div>
+        <h3>Your watchlist is waiting</h3>
+        <p>Check a product using the form above to add it to your watchlist.</p>
+        <a href="#track" class="secondary-button">Check a product →</a>
+    </div>
+    {% endif %}
+</section>
+
+               
+
+            
+<section class="panel lower-panel" id="history">
+    <div class="lower-heading">
+        <div>
+            <div class="section-label">PRICE INSIGHTS</div>
+            <h2>Price history</h2>
+            <p>Prices recorded each time you check a product.</p>
+        </div>
+    </div>
+
+    {% if history %}
+    <div class="product-list">
+        {% for item in history %}
+        <article class="product-row">
+            <div class="product-info">
+                <strong>{{ item.name }}</strong>
+                <span>{{ item.checked_at }}</span>
+            </div>
+            <div class="product-price">
+                <strong>₹{{ "%.2f"|format(item.price) }}</strong>
+                <a href="{{ item.url }}" target="_blank"
+                   rel="noopener noreferrer">View product ↗</a>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">◷</div>
+        <h3>No recorded prices yet</h3>
+        <p>Your real price history will appear here after successful checks.</p>
+    </div>
+    {% endif %}
+</section>
+
+
+
+            
+<section class="panel lower-panel" id="settings">
+    <div class="lower-heading">
+        <div>
+            <div class="section-label">PREFERENCES</div>
+            <h2>Settings</h2>
+            <p>Choose how you want PricePulse to behave in this browser.</p>
+        </div>
+    </div>
+
+    <div class="settings-row">
+        <div>
+            <strong>Price display currency</strong>
+            <p>PricePulse currently displays prices in Indian rupees (₹).</p>
+        </div>
+    </div>
+
+    <div class="settings-row">
+        <div>
+            <strong>Refresh preference</strong>
+            <p>Choose when you would like to check prices again.</p>
+        </div>
+        <select id="refreshPreference">
+            <option value="manual">Manual checks</option>
+            <option value="15">Every 15 minutes (preference only)</option>
+            <option value="60">Every hour (preference only)</option>
+        </select>
+    </div>
+
+    <button type="button" class="secondary-button" id="saveSettings">
+        Save settings
+    </button>
+    <p id="settingsMessage" role="status"></p>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const preference = document.getElementById("refreshPreference");
+    const message = document.getElementById("settingsMessage");
+
+    preference.value = localStorage.getItem("pricepulseRefresh") || "manual";
+
+    document.getElementById("saveSettings").addEventListener("click", function () {
+        localStorage.setItem("pricepulseRefresh", preference.value);
+        message.textContent = "Your preference has been saved.";
+    });
+});
+</script>
+
+
+            <footer class="page-footer">
+                <a href="#dashboard" class="footer-brand">Price<span class="accent">Pulse</span></a>
+                <p>Smart shopping. Smarter savings.</p>
+                <span>BUY BETTER, NOT JUST MORE. ✦</span>
+            </footer>
+        </main>
+    </div>
+</body>
+</html>
